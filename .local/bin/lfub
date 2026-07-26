@@ -1,8 +1,26 @@
 #!/bin/sh
 
-# Historically this was a wrapper that set up a ueberzug daemon for lf image
-# previews. DARBS renders previews as text with chafa (see ~/.config/lf/scope)
-# so no environment is needed; this passthrough is kept so existing aliases
-# and bindings that call lfub keep working.
+# This is a wrapper script for lf that allows it to create image previews with
+# ueberzug. This works in concert with the lf configuration file and the
+# lf-cleaner script. If ueberzug is unavailable (not installed, no X, or over
+# SSH), it falls back to plain lf and the scope script renders previews as
+# text with chafa instead.
 
-exec lf "$@"
+set -e
+
+cleanup() {
+	exec 3>&-
+	rm "$FIFO_UEBERZUG"
+}
+
+if command -v ueberzug >/dev/null 2>&1 && [ -n "$DISPLAY" ] && [ -z "$SSH_CLIENT" ] && [ -z "$SSH_TTY" ]; then
+	[ ! -d "$HOME/.cache/lf" ] && mkdir -p "$HOME/.cache/lf"
+	export FIFO_UEBERZUG="$HOME/.cache/lf/ueberzug-$$"
+	mkfifo "$FIFO_UEBERZUG"
+	ueberzug layer -s <"$FIFO_UEBERZUG" -p json &
+	exec 3>"$FIFO_UEBERZUG"
+	trap cleanup HUP INT QUIT TERM EXIT
+	lf "$@" 3>&-
+else
+	exec lf "$@"
+fi

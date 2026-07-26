@@ -2,11 +2,11 @@
 
 
 # Note on Image Previews
-# Image/video/pdf previews are rendered as text with chafa by the previewer
-# script (~/.config/lf/scope for me), so they work in any terminal with no
-# daemon or wrapper. These are set up automatically for DARBS users; for
-# manual setups, chafa must be installed. The lfub wrapper from the ueberzug
-# era is now just a passthrough kept for old aliases.
+# Image/video/pdf previews use ueberzug (pixel-perfect X11 overlays) when it
+# is available, via the lfub wrapper (~/.local/bin/lfub) that sets up its
+# FIFO. When ueberzug is missing, or over SSH, the scope script falls back
+# to rendering previews as text with chafa. Both are set up automatically
+# for DARBS users.
 
 # Basic vars
 set shellopts '-eu'
