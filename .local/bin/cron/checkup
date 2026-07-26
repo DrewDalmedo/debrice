@@ -4,12 +4,12 @@
 
 notify-send "📦 Repository Sync" "Checking for package updates..."
 
-sudo pacman -Syyuw --noconfirm || notify-send "Error downloading updates.
+sudo apt-get update && sudo apt-get -d -y upgrade || notify-send "Error downloading updates.
 
-Check your internet connection, if pacman is already running, or run update manually to see errors."
+Check your internet connection, if apt is already running, or run update manually to see errors."
 pkill -RTMIN+8 "${STATUSBAR:-dwmblocks}"
 
-if pacman -Qu | grep -v "\[ignored\]"
+if apt-get -s upgrade 2>/dev/null | grep -q "^Inst "
 then
 	notify-send "🎁 Repository Sync" "Updates available. Click statusbar icon (📦) for update."
 else

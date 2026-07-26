@@ -6,8 +6,8 @@ set -C -f
 IFS="$(printf '%b_' '\n')"; IFS="${IFS%_}"
 
 image() {
-	if [ -f "$1" ] && [ -n "$DISPLAY" ] && [ -z "$WAYLAND_DISPLAY" ] && command -V ueberzug >/dev/null 2>&1; then
-		printf '{"action": "add", "identifier": "PREVIEW", "x": "%s", "y": "%s", "width": "%s", "height": "%s", "scaler": "contain", "path": "%s"}\n' "$4" "$5" "$(($2-1))" "$(($3-1))" "$1" > "$FIFO_UEBERZUG"
+	if [ -f "$1" ] && command -V chafa >/dev/null 2>&1; then
+		chafa "$1" -f symbols --animate off -s "$(($2-2))x$(($3-2))" 2>/dev/null
 	else
 		mediainfo "$6"
 	fi

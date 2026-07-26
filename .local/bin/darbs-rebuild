@@ -1,0 +1,17 @@
+#!/bin/sh
+
+# Rebuilds and reinstalls every program DARBS compiled from source into
+# ~/.local/src (dwm, st, dmenu, dwmblocks, mutt-wizard). Run this after a
+# Debian release upgrade: the suckless binaries link X11 libraries outside
+# apt's view, so if a library changed under them, one run of this script
+# fixes everything.
+
+for dir in "$HOME/.local/src"/*/; do
+	[ -f "$dir/Makefile" ] || continue
+	printf "==> Rebuilding %s\n" "$(basename "$dir")"
+	make -C "$dir" clean >/dev/null 2>&1
+	make -C "$dir" >/dev/null 2>&1 || { printf "BUILD FAILED: %s\n" "$dir" >&2; continue; }
+	sudo make -C "$dir" install >/dev/null 2>&1 || printf "INSTALL FAILED: %s\n" "$dir" >&2
+done
+
+printf "Done. Restart X (or log out and back in) to use the new binaries.\n"

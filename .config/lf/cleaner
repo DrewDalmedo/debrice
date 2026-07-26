@@ -1,4 +1,3 @@
 #!/bin/sh
-if [ -n "$FIFO_UEBERZUG" ]; then
-	printf '{"action": "remove", "identifier": "PREVIEW"}\n' > "$FIFO_UEBERZUG"
-fi
+# Nothing to clean: chafa draws previews as text inside the preview pane
+# rather than overlaying windows like ueberzug did.

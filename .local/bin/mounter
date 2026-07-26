@@ -11,9 +11,11 @@ IFS='
 # Function for escaping cell-phone names.
 escape(){ echo "$@" | iconv -cf UTF-8 -t ASCII//TRANSLIT | tr -d '[:punct:]' | tr '[:upper:]' '[:lower:]' | tr ' ' '-' | sed "s/-\+/-/g;s/\(^-\|-\$\)//g" ;}
 
-# Check for phones.
-phones="$(simple-mtpfs -l 2>/dev/null | sed "s/^/📱/")"
-mountedphones="$(grep "simple-mtpfs" /etc/mtab)"
+# Check for phones. jmtpfs lists devices as
+# `busLocation, devNum, productId, vendorId, product, vendor` rows; turn
+# them into `📱bus,dev: vendor product` entries.
+phones="$(jmtpfs -l 2>/dev/null | awk -F", " '/^[0-9]+, [0-9]+/{printf "📱%s,%s: %s %s\n", $1, $2, $6, $5}')"
+mountedphones="$(grep "jmtpfs" /etc/mtab)"
 # If there are already mounted phones, remove them from the list of mountables.
 [ -n "$mountedphones" ] && phones="$(for phone in $phones; do
 	for mounted in $mountedphones; do
@@ -116,9 +118,9 @@ case "$chosen" in
 	📱*)
 		notify-send "❗Note" "Remember to allow file access on your phone now."
 		getmount
-		number="${chosen%%:*}"
-		number="${chosen:1}"	# This is a bashism.
-		sudo -A simple-mtpfs -o allow_other -o fsname="simple-mtpfs-$(escape "$chosen")" --device "$number" "$mp"
+		device="${chosen%%:*}"
+		device="${device#📱}"
+		sudo -A jmtpfs -o allow_other -o fsname="jmtpfs-$(escape "$chosen")" -device="$device" "$mp"
 		notify-send "🤖 Android Mounted." "Android device mounted to $mp."
 		;;
 esac
